@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { supabase } from '../lib/supabase'
 
 const SCORE_DIMENSIONS = [
   { key: 'score_clarity', label: 'Clarity' },
@@ -10,6 +11,11 @@ const SCORE_DIMENSIONS = [
   { key: 'score_readability', label: 'Readability' },
   { key: 'score_keyword_match', label: 'Keyword Match' },
 ]
+
+const SECTION_LABELS = {
+  professional_summary: 'Professional Summary',
+  bullet_points: 'Bullet Points',
+}
 
 function scoreColor(score) {
   if (score >= 75) return 'text-green-600'
@@ -29,14 +35,165 @@ function overallRingColor(score) {
   return 'border-red-400'
 }
 
+function RewriteCard({ result, plan }) {
+  const [rewriteLoading, setRewriteLoading] = useState(false)
+  const [rewriteText, setRewriteText] = useState('')
+  const [rewriteError, setRewriteError] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  const sectionLabel =
+    SECTION_LABELS[result.weakest_section] ?? result.weakest_section ?? 'weakest section'
+
+  async function handleRewrite() {
+    setRewriteLoading(true)
+    setRewriteError('')
+    setRewriteText('')
+
+    try {
+      const res = await fetch('/api/rewrite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          analysis_id: result.id,
+          weakest_section: result.weakest_section,
+        }),
+      })
+
+      if (!res.ok) {
+        const { error } = await res.json()
+        throw new Error(error ?? 'Rewrite failed')
+      }
+
+      const { rewrite } = await res.json()
+      setRewriteText(rewrite)
+    } catch (err) {
+      setRewriteError(err.message)
+    } finally {
+      setRewriteLoading(false)
+    }
+  }
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(rewriteText)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <section>
+      <div className="rounded-xl border border-zinc-200 bg-white p-6">
+        <div className="flex items-start justify-between gap-4 mb-1">
+          <h2 className="text-lg font-semibold text-zinc-900">AI Rewrite</h2>
+          <span className="rounded-full bg-zinc-900 px-2.5 py-0.5 text-xs font-semibold text-white shrink-0">
+            Pro
+          </span>
+        </div>
+
+        <p className="text-sm text-zinc-500 mb-5">
+          Your <span className="font-medium text-zinc-700">{sectionLabel}</span> is your weakest
+          section. Want AI to rewrite it?
+        </p>
+
+        {plan === 'pro' ? (
+          <>
+            {!rewriteText && (
+              <button
+                onClick={handleRewrite}
+                disabled={rewriteLoading}
+                className="flex items-center gap-2 rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              >
+                {rewriteLoading ? (
+                  <>
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    Rewriting...
+                  </>
+                ) : (
+                  'Rewrite This Section'
+                )}
+              </button>
+            )}
+
+            {rewriteError && (
+              <p className="mt-3 text-sm text-red-600">{rewriteError}</p>
+            )}
+
+            {rewriteText && (
+              <div className="mt-4 space-y-3">
+                <textarea
+                  readOnly
+                  value={rewriteText}
+                  rows={6}
+                  className="w-full resize-none rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-800 focus:outline-none"
+                />
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleCopy}
+                    className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+                  >
+                    {copied ? 'Copied!' : 'Copy to Clipboard'}
+                  </button>
+                  <button
+                    onClick={() => { setRewriteText(''); setRewriteError('') }}
+                    className="text-sm text-zinc-400 hover:text-zinc-600 transition-colors"
+                  >
+                    Rewrite again
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50 px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-zinc-500">
+              This is a Pro feature. Upgrade to unlock AI rewrites.
+            </p>
+            <Link
+              href="/account"
+              className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+            >
+              Upgrade to Pro
+            </Link>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 export default function ResultsPage() {
   const [result, setResult] = useState(null)
+  const [plan, setPlan] = useState('free')
 
   useEffect(() => {
     const stored = sessionStorage.getItem('analysis_result')
     if (stored) {
       setResult(JSON.parse(stored))
     }
+
+    async function fetchPlan() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user.id)
+        .single()
+
+      if (data?.plan) {
+        setPlan(data.plan)
+      }
+    }
+
+    fetchPlan()
   }, [])
 
   if (!result) {
@@ -155,15 +312,11 @@ export default function ResultsPage() {
           </ul>
         </section>
 
+        {/* AI Rewrite */}
+        <RewriteCard result={result} plan={plan} />
+
         {/* Actions */}
-        <section className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <button
-            disabled
-            className="rounded-xl border border-zinc-200 bg-white px-6 py-2.5 text-sm font-medium text-zinc-400 cursor-not-allowed"
-            title="Coming soon"
-          >
-            Rewrite My Summary
-          </button>
+        <section className="flex justify-end">
           <Link
             href="/analyze"
             className="rounded-xl bg-zinc-900 px-6 py-2.5 text-center text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
