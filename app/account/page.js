@@ -13,27 +13,29 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event !== 'INITIAL_SESSION') return
 
-      if (!user) {
-        router.push('/login')
-        return
+        if (!session) {
+          router.push('/login')
+          return
+        }
+
+        setUser(session.user)
+
+        const { data } = await supabase
+          .from('profiles')
+          .select('plan')
+          .eq('id', session.user.id)
+          .single()
+
+        setPlan(data?.plan ?? 'free')
+        setLoading(false)
       }
+    )
 
-      setUser(user)
-
-      const { data } = await supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', user.id)
-        .single()
-
-      setPlan(data?.plan ?? 'free')
-      setLoading(false)
-    }
-
-    load()
+    return () => subscription.unsubscribe()
   }, [router])
 
   if (loading) {

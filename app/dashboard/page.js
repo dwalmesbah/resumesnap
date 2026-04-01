@@ -46,30 +46,34 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        // INITIAL_SESSION fires once on mount with the session from cookies.
+        // Waiting for it avoids redirecting before the client has hydrated.
+        if (event !== 'INITIAL_SESSION') return
 
-      if (!user) {
-        router.push('/login')
-        return
+        if (!session) {
+          router.push('/login')
+          return
+        }
+
+        setUser(session.user)
+
+        const { data, error } = await supabase
+          .from('analyses')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+
+        if (!error && data) {
+          setAnalyses(data)
+        }
+
+        setLoading(false)
       }
+    )
 
-      setUser(user)
-
-      const { data, error } = await supabase
-        .from('analyses')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (!error && data) {
-        setAnalyses(data)
-      }
-
-      setLoading(false)
-    }
-
-    load()
+    return () => subscription.unsubscribe()
   }, [router])
 
   function handleViewResults(analysis) {
