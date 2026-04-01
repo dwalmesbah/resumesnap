@@ -87,9 +87,11 @@ export default function AccountPage() {
               <a
                 id="upgrade-btn"
                 href={
-                  process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL +
-                  '?checkout[email]=' +
-                  encodeURIComponent(user?.email ?? '')
+                  process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL
+                    ? process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL +
+                      '?checkout[email]=' +
+                      encodeURIComponent(user?.email ?? '')
+                    : '#'
                 }
                 target="_blank"
                 rel="noopener noreferrer"
@@ -99,7 +101,7 @@ export default function AccountPage() {
               </a>
             )}
             <a
-              href="/api/billing-portal"
+              href="mailto:support@resumesnap.com?subject=Manage%20My%20Billing"
               className="block w-full rounded-lg border border-zinc-200 px-5 py-2.5 text-center text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
             >
               Manage Billing

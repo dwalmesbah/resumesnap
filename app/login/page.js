@@ -76,12 +76,17 @@ function LoginForm() {
           </div>
 
           <div>
-            <label
-              className="block text-sm font-medium text-zinc-700 mb-1"
-              htmlFor="password"
-            >
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label
+                className="text-sm font-medium text-zinc-700"
+                htmlFor="password"
+              >
+                Password
+              </label>
+              <Link href="/forgot-password" className="text-xs text-zinc-400 hover:text-zinc-600">
+                Forgot your password?
+              </Link>
+            </div>
             <input
               id="password"
               type="password"
@@ -103,13 +108,7 @@ function LoginForm() {
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-zinc-500">
-          <Link href="/forgot-password" className="font-medium text-zinc-900 hover:underline">
-            Forgot your password?
-          </Link>
-        </p>
-
-        <p className="mt-3 text-center text-sm text-zinc-500">
+        <p className="mt-6 text-center text-sm text-zinc-500">
           Don&apos;t have an account?{' '}
           <Link href="/signup" className="font-medium text-zinc-900 hover:underline">
             Sign up
