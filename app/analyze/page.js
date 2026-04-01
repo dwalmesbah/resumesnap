@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { supabase } from '../lib/supabase'
 
 export default function AnalyzePage() {
   const router = useRouter()
@@ -23,12 +24,15 @@ export default function AnalyzePage() {
     setLoading(true)
 
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           resume_text: resumeText,
           job_description: jobDescription,
+          user_id: user?.id ?? null,
         }),
       })
 

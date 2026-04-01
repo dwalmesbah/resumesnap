@@ -33,7 +33,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { resume_text, job_description } = body
+  const { resume_text, job_description, user_id } = body
 
   if (!resume_text?.trim() || !job_description?.trim()) {
     return NextResponse.json({ error: 'Both fields are required' }, { status: 400 })
@@ -44,6 +44,7 @@ export async function POST(request) {
     .insert({
       resume_text,
       job_description,
+      user_id,
       score_overall: MOCK_RESULT.score_overall,
       score_clarity: MOCK_RESULT.score_clarity,
       score_relevance: MOCK_RESULT.score_relevance,
