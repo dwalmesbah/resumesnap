@@ -1,52 +1,29 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '../lib/supabase'
+import { createSupabaseServerClient } from '../lib/supabase-server'
 import LogoutButton from '../components/LogoutButton'
 
-export default function AccountPage() {
-  const router = useRouter()
-  const [user, setUser] = useState(null)
-  const [plan, setPlan] = useState(null)
-  const [loading, setLoading] = useState(true)
+export default async function AccountPage() {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event !== 'INITIAL_SESSION') return
-
-        if (!session) {
-          router.push('/login')
-          return
-        }
-
-        setUser(session.user)
-
-        const { data } = await supabase
-          .from('profiles')
-          .select('plan')
-          .eq('id', session.user.id)
-          .single()
-
-        setPlan(data?.plan ?? 'free')
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [router])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
-      </div>
-    )
+  if (!user) {
+    redirect('/login')
   }
 
-  const isPro = plan === 'pro'
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', user.id)
+    .single()
+
+  const isPro = (profile?.plan ?? 'free') === 'pro'
+
+  const checkoutUrl = process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL
+    ? process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL +
+      '?checkout[email]=' +
+      encodeURIComponent(user.email)
+    : null
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -85,16 +62,10 @@ export default function AccountPage() {
           </p>
 
           <div className="flex flex-col gap-3">
-            {!isPro && (
+            {!isPro && checkoutUrl && (
               <a
                 id="upgrade-btn"
-                href={
-                  process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL
-                    ? process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL +
-                      '?checkout[email]=' +
-                      encodeURIComponent(user?.email ?? '')
-                    : '#'
-                }
+                href={checkoutUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full rounded-lg bg-zinc-900 px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-zinc-700 transition-colors"
