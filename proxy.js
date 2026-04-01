@@ -33,6 +33,14 @@ export async function proxy(request) {
   // needed. Do not add any logic between createServerClient and this call.
   const { data: { user } } = await supabase.auth.getUser()
 
+  const cookieNames = request.cookies.getAll().map((c) => c.name)
+  console.log('[proxy]', {
+    url: request.url,
+    userFound: !!user,
+    userId: user?.id ?? null,
+    cookies: cookieNames,
+  })
+
   if (!user) {
     const loginUrl = new URL('/login', request.url)
     return NextResponse.redirect(loginUrl)
