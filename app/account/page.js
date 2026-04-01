@@ -84,12 +84,19 @@ export default function AccountPage() {
 
           <div className="flex flex-col gap-3">
             {!isPro && (
-              <button
+              <a
                 id="upgrade-btn"
-                className="w-full rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-zinc-700 transition-colors"
+                href={
+                  process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL +
+                  '?checkout[email]=' +
+                  encodeURIComponent(user?.email ?? '')
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full rounded-lg bg-zinc-900 px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-zinc-700 transition-colors"
               >
                 Upgrade to Pro — $9/month
-              </button>
+              </a>
             )}
             <a
               href="/api/billing-portal"

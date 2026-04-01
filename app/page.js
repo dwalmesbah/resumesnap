@@ -282,12 +282,14 @@ function Pricing() {
                 </li>
               ))}
             </ul>
-            <Link
-              href="/signup"
+            <a
+              href={process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? '/signup'}
+              target="_blank"
+              rel="noopener noreferrer"
               className="block rounded-xl bg-white px-6 py-3 text-center text-sm font-semibold text-zinc-900 hover:bg-zinc-100 transition-colors"
             >
               Upgrade to Pro
-            </Link>
+            </a>
           </div>
 
         </div>
