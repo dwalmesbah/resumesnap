@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '../utils/supabase/server'
-import LogoutButton from '../components/LogoutButton'
+import NavBar from '../components/NavBar'
 import AnalysesList from './AnalysesList'
 
 export default async function DashboardPage() {
@@ -20,14 +20,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
-          <Link href="/dashboard" className="text-lg font-bold text-zinc-900 tracking-tight">
-            ResumeSnap
-          </Link>
-          <LogoutButton />
-        </div>
-      </header>
+      <NavBar />
 
       <main className="mx-auto max-w-4xl px-6 py-10 space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
