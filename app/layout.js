@@ -14,6 +14,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "CareerReady — Tools for Job Seekers",
   description: "AI-powered tools to help you land your dream job. Resume analysis, cover letters, and more — all in one place.",
+  verification: {
+    google: "99UwwS9nIipe446B2LblBWdHFsAb7RQvRgQDSJvq874",
+  },
 };
 
 export default function RootLayout({ children }) {
