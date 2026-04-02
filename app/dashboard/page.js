@@ -22,7 +22,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
-          <Link href="/" className="text-lg font-bold text-zinc-900 tracking-tight">
+          <Link href="/dashboard" className="text-lg font-bold text-zinc-900 tracking-tight">
             ResumeSnap
           </Link>
           <LogoutButton />
