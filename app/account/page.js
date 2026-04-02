@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createSupabaseServerClient } from '../lib/supabase-server'
+import { createClient } from '../utils/supabase/server'
 import LogoutButton from '../components/LogoutButton'
 
 export default async function AccountPage() {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
