@@ -4,13 +4,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '../utils/supabase/client'
 import NavBar from '../components/NavBar'
 
-const STATUSES = ['Applied', 'Interview', 'Offer', 'Rejected']
+const STATUSES = ['Applied', 'Interview', 'Offer Received', 'Accepted', 'Rejected']
 
 const STATUS_STYLES = {
-  Applied:   'bg-blue-50 text-blue-700 border-blue-200',
-  Interview: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  Offer:     'bg-green-50 text-green-700 border-green-200',
-  Rejected:  'bg-red-50 text-red-600 border-red-200',
+  Applied:        'bg-blue-50 text-blue-700 border-blue-200',
+  Interview:      'bg-yellow-50 text-yellow-700 border-yellow-200',
+  'Offer Received': 'bg-purple-50 text-purple-700 border-purple-200',
+  Accepted:       'bg-green-50 text-green-700 border-green-200',
+  Rejected:       'bg-red-50 text-red-600 border-red-200',
 }
 
 function today() {

@@ -42,7 +42,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Company name and job title are required' }, { status: 400 })
   }
 
-  if (!['Applied', 'Interview', 'Offer', 'Rejected'].includes(status)) {
+  if (!['Applied', 'Interview', 'Offer Received', 'Accepted', 'Rejected'].includes(status)) {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
   }
 
