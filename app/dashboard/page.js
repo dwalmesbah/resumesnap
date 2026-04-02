@@ -63,7 +63,6 @@ const TOOLS = [
     name: 'Job Tracker',
     description: 'Track your job applications in one place',
     href: '/tracker',
-    comingSoon: true,
   },
 ]
 
