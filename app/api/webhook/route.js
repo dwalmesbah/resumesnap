@@ -3,32 +3,48 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
 const UPGRADE_EVENTS = new Set(['order_created', 'subscription_created'])
 
 export async function POST(request) {
-  let payload
+  let body
   try {
-    payload = await request.json()
+    body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+    // Always return 200 so Lemon Squeezy does not retry on parse failure
+    return NextResponse.json({ received: true })
   }
 
-  const eventName = payload?.meta?.event_name
-  const email = payload?.data?.attributes?.user_email
+  const eventName = body?.meta?.event_name
+  const email = body?.data?.attributes?.user_email
 
   if (UPGRADE_EVENTS.has(eventName) && email) {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ plan: 'pro' })
-      .eq('email', email)
+    // Look up the auth user by email using the service-role admin API,
+    // then update profiles by id — avoids requiring an email column on profiles.
+    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
 
-    if (error) {
-      console.error('Webhook: failed to update plan for', email, error.message)
+    if (listError) {
+      console.error('Webhook: admin.listUsers error:', listError.message)
+    } else {
+      const user = users.find((u) => u.email === email)
+
+      if (user) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ plan: 'pro' })
+          .eq('id', user.id)
+
+        if (updateError) {
+          console.error('Webhook: failed to upgrade plan for', email, updateError.message)
+        }
+      } else {
+        console.warn('Webhook: no auth user found for email:', email)
+      }
     }
   }
 
+  // Always return 200 so Lemon Squeezy does not retry
   return NextResponse.json({ received: true })
 }
