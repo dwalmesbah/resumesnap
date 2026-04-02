@@ -57,7 +57,7 @@ function Navbar() {
     <nav className="bg-zinc-900 border-b border-zinc-800">
       <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
         <span className="text-xl font-bold text-white tracking-tight">
-          ResumeSnap
+          CareerReady
         </span>
         <div className="flex items-center gap-3">
           <Link
@@ -86,10 +86,10 @@ function Hero() {
           AI-Powered Resume Analysis
         </span>
         <h1 className="text-5xl font-bold text-white leading-tight tracking-tight sm:text-6xl">
-          Get Your Resume Score<br />in 30 Seconds
+          Your Complete Job Search Toolkit
         </h1>
         <p className="mt-6 text-lg text-zinc-400 leading-relaxed max-w-xl mx-auto">
-          AI-powered analysis that scores your resume, finds missing keywords, and tells you exactly what to fix.
+          AI-powered tools to help you land your dream job. Resume analysis, cover letters, and more — all in one place.
         </p>
         <div className="mt-10">
           <Link
@@ -302,7 +302,7 @@ function Footer() {
   return (
     <footer className="bg-zinc-900 border-t border-zinc-800 py-8">
       <div className="mx-auto max-w-6xl px-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <span className="text-sm text-zinc-500">ResumeSnap &copy; 2026</span>
+        <span className="text-sm text-zinc-500">CareerReady &copy; 2026</span>
         <div className="flex items-center gap-6">
           <Link href="/login" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
             Login

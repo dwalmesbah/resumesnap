@@ -67,7 +67,7 @@ export default async function AccountPage() {
               </a>
             )}
             <a
-              href="mailto:support@resumesnap.com?subject=Manage%20My%20Billing"
+              href="mailto:support@careerready.com?subject=Manage%20My%20Billing"
               className="block w-full rounded-lg border border-zinc-200 px-5 py-2.5 text-center text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
             >
               Manage Billing
