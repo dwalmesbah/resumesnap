@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import OpenAI from 'openai'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-const MOCK_REWRITTEN_BULLETS = `• Led cross-functional team of 8 engineers to deliver a payment integration 3 weeks ahead of schedule, reducing checkout drop-off by 22%
-• Resolved 95% of tier-1 support tickets within SLA by building an internal knowledge base used by 12 support agents
-• Grew monthly recurring revenue by 18% over two quarters by identifying and closing a pricing gap in the mid-market segment
-• Automated weekly reporting pipeline using Python, saving the data team 6 hours per week and eliminating manual errors
-• Spearheaded migration of legacy monolith to microservices architecture, improving deployment frequency from monthly to daily`
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 export async function POST(request) {
   let body
@@ -39,7 +36,32 @@ export async function POST(request) {
     }
   }
 
-  const rewritten_bullets = MOCK_REWRITTEN_BULLETS
+  let rewritten_bullets
+  try {
+    const userContent = job_description?.trim()
+      ? `BULLET POINTS:\n${bullet_points}\n\nJOB DESCRIPTION:\n${job_description}`
+      : `BULLET POINTS:\n${bullet_points}`
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are an expert resume writer. Rewrite the following bullet points to be stronger, more impactful, and achievement-focused.\nRules:\n- Start each bullet with a strong action verb\n- Add metrics where possible (%, numbers, time saved)\n- Keep each bullet to one line\n- Match keywords from the job description if provided\n- Return only the rewritten bullet points, one per line, starting with •',
+        },
+        {
+          role: 'user',
+          content: userContent,
+        },
+      ],
+    })
+
+    rewritten_bullets = completion.choices[0].message.content.trim()
+  } catch (err) {
+    console.error('OpenAI error:', err.message)
+    return NextResponse.json({ error: 'Failed to rewrite bullet points' }, { status: 500 })
+  }
 
   // Save to bullet_rewrites table
   const { error: insertError } = await supabase
