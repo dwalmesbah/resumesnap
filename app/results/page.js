@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '../lib/supabase'
+import { createClient } from '../utils/supabase/client'
+import NavBar from '../components/NavBar'
 
 const SCORE_DIMENSIONS = [
   { key: 'score_clarity', label: 'Clarity' },
@@ -179,7 +180,7 @@ export default function ResultsPage() {
     }
 
     async function fetchPlan() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user } } = await createClient().auth.getUser()
       if (!user) return
 
       const { data } = await supabase
@@ -216,13 +217,7 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
-          <Link href="/dashboard" className="text-lg font-semibold text-zinc-900 hover:text-zinc-600">
-            ResumeSnap
-          </Link>
-        </div>
-      </header>
+      <NavBar />
 
       <main className="mx-auto max-w-4xl px-6 py-12 space-y-10">
 

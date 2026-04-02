@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { supabase } from '../lib/supabase'
+import { createClient } from '../utils/supabase/client'
+import NavBar from '../components/NavBar'
 
 export default function AnalyzePage() {
   const router = useRouter()
@@ -24,7 +24,7 @@ export default function AnalyzePage() {
     setLoading(true)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user } } = await createClient().auth.getUser()
 
       const res = await fetch('/api/analyze', {
         method: 'POST',
@@ -52,13 +52,7 @@ export default function AnalyzePage() {
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto max-w-4xl flex items-center justify-between px-6 py-4">
-          <Link href="/dashboard" className="text-lg font-semibold text-zinc-900 hover:text-zinc-600">
-            ResumeSnap
-          </Link>
-        </div>
-      </header>
+      <NavBar />
 
       <main className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-8">

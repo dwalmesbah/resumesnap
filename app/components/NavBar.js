@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import LogoutButton from './LogoutButton'
 
 const NAV_LINKS = [
+  { href: '/', label: 'Home' },
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/analyze', label: 'Analyze' },
   { href: '/account', label: 'Account' },
