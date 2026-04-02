@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+import { createClient } from './utils/supabase/server'
 import Link from 'next/link'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -318,7 +320,14 @@ function Footer() {
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    redirect('/dashboard')
+  }
+
   return (
     <>
       <Navbar />
